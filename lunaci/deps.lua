@@ -6,6 +6,7 @@
 module("lunaci.deps", package.seeall)
 
 local const = require("lunaci.constraints")
+local config = require("lunaci.config")
 --local pkg = require("lunaci.package")
 
 require "pl"
@@ -13,7 +14,7 @@ stringx.import()
 
 local package_mt = {__tostring = function(o) return o.package .. " " .. o.version end}
 local function newPackage(pkg, ver, manifest)
-    local p = {package = pkg, version = ver, dependencies = manifest[pkg][ver]}
+    local p = {package = pkg, version = ver, dependencies = manifest.packages[pkg][ver].dependencies}
     setmetatable(p, package_mt)
     return p
 end
@@ -46,16 +47,24 @@ end
 function find_candidates(package, manifest)
     pkg_name, pkg_constraint = const.split(package)
     pkg_constraint = pkg_constraint or ""
-    if not manifest[pkg_name] then return {} end
+    if not manifest.packages[pkg_name] then return {} end
 
     local found = {}
-    for version in tablex.sort(manifest[pkg_name], const.compareVersions) do
+    for version in tablex.sort(manifest.packages[pkg_name], const.compareVersions) do
         if const.constraint_satisified(version, pkg_constraint) then
             table.insert(found, newPackage(pkg_name, version, manifest))
         end
     end
 
     return found
+end
+
+
+function get_platform_deps(platforms)
+    if platforms[config.platform] then
+        return platforms[config.platform]
+    end
+    return {}
 end
 
 
@@ -134,11 +143,19 @@ function resolve_dependencies(package, manifest, installed, dependency_parents, 
         -- Resolve dependencies of the package
         if pkg.dependencies then
 
+            local deps = pkg.dependencies
+
+            if deps.platforms then
+                tablex.insertvalues(deps, get_platform_deps(deps.platforms))
+               deps.platforms = nil
+                -- TODO merge dependencies properly
+            end
+
             -- For preventing circular dependencies
             table.insert(dependency_parents, pkg.package)
 
             -- For each dep of pkg
-            for _, dep in ipairs(pkg.dependencies) do
+            for _, dep in ipairs(deps) do
                 -- Detect circular dependencies
                 local has_circular_dependency = false
                 local dep_name = const.split(dep)
@@ -206,14 +223,14 @@ function get_package_list(package, manifest, version)
     assert(type(manifest) == "table", "deps.get_package_list: manifest must be table")
     if version then assert(type(version) == "string", "deps.get_package_list: version must be string") end
 
-    if not manifest[package] or (version and not manifest[package][version]) then
+    if not manifest['packages'][package] or (version and not manifest['packages'][package][version]) then
         return nil, "No such package: "..package.." "..version
     end
 
 
     -- Add virtual Lua package to the manifest
     local lua_version = _VERSION:match("Lua%s+([%d%.%-]+)")
-    manifest["lua"] = {[lua_version] = {}}
+    manifest.packages["lua"] = {[lua_version] = {dependencies = {}}}
     local installed = {newPackage("lua", lua_version, manifest)}
 
     --local pkg = newPackage(package, version, manifest)

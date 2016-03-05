@@ -16,6 +16,8 @@ local data_dir = path.abspath("data")
 
 manifest_file = path.join(data_dir, "manifest-file")     -- Manifest file with module dependencies
 
+platform = "unix"
+
 
 -- Logging ---------------------------------------------------------------------
 log_level       = logging.DEBUG                                -- Logging level.

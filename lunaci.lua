@@ -28,18 +28,21 @@ if not pkg then
 end
 
 
---[[
-manifest = {
-    a = {
-        ["1.0"] = {"c 2.0"}
+local testpackage = {
+    "lua >= 5.1",
+    "penlight",
+    platforms = {
+        unix = {
+            "lua >= 5.2",
+            "luasocket >= 2.0",
+            "lnotify < 1.0"
+        }
     },
-    b = {
-        ["1.0"] = {"a 1.0"}
-    }
+
 }
 
-pkg = "a"
---]]
+manifest.packages["testpackage"] = {["0.1"] = {dependencies = testpackage}}
+
 dependencies, err = deps.get_package_list(pkg, manifest)
 
 if err then print("Error:", err) end
