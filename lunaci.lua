@@ -41,7 +41,7 @@ local testpackage = {
 
 }
 
-manifest.packages["testpackage"] = {["0.1"] = {dependencies = testpackage}}
+manifest.packages["testpackage"] = {["0.1"] = {dependencies = testpackage, supported_platforms = {"unix"}}}
 
 dependencies, err = deps.get_package_list(pkg, manifest)
 

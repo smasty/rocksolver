@@ -7,17 +7,11 @@ module("lunaci.deps", package.seeall)
 
 local const = require("lunaci.constraints")
 local config = require("lunaci.config")
---local pkg = require("lunaci.package")
+local Package = require("lunaci.Package")
 
 require "pl"
 stringx.import()
 
-local package_mt = {__tostring = function(o) return o.package .. " " .. o.version end}
-local function newPackage(pkg, ver, manifest)
-    local p = {package = pkg, version = ver, dependencies = manifest.packages[pkg][ver].dependencies}
-    setmetatable(p, package_mt)
-    return p
-end
 
 
 -- Check if a given package is in the provided list of installed packages.
@@ -29,7 +23,7 @@ function is_installed(pkg_name, installed, pkg_constraint)
     local pkg_installed, err = false, nil
 
     for _, installed_pkg in ipairs(installed) do
-        if pkg_name == installed_pkg.package then
+        if pkg_name == installed_pkg.name then
             if not pkg_constraint or const.constraint_satisified(installed_pkg.version, pkg_constraint) then
                 pkg_installed = true
                 break
@@ -50,21 +44,16 @@ function find_candidates(package, manifest)
     if not manifest.packages[pkg_name] then return {} end
 
     local found = {}
-    for version in tablex.sort(manifest.packages[pkg_name], const.compareVersions) do
+    for version, spec in tablex.sort(manifest.packages[pkg_name], const.compareVersions) do
         if const.constraint_satisified(version, pkg_constraint) then
-            table.insert(found, newPackage(pkg_name, version, manifest))
+            local pkg = Package:new(pkg_name, version, spec)
+            if pkg:supports_platform(config.platform) then
+                table.insert(found, pkg)
+            end
         end
     end
 
     return found
-end
-
-
-function get_platform_deps(platforms)
-    if platforms[config.platform] then
-        return platforms[config.platform]
-    end
-    return {}
 end
 
 
@@ -73,7 +62,11 @@ local function table_tostring(tbl, label)
     local str = ""
     for k,v in pairs(tbl) do
         if type(v) == "table" then
-            str = str .. "(" ..table_tostring(v, k) .. ")"
+            if v.name then
+                str = str .. tostring(v) .. " "
+            else
+                str = str .. "(" ..table_tostring(v, k) .. ")"
+            end
         else
             if label ~= nil then
                 str = str .. " " .. k .. " = " .. tostring(v) .. ", "
@@ -121,19 +114,19 @@ function resolve_dependencies(package, manifest, installed, dependency_parents, 
     for _, pkg in ipairs(candidates) do
 
         --[[ for future debugging:
-        print('  candidate: '.. pkg.package..'-'..pkg.version)
+        print('  candidate: '.. pkg.name..'-'..pkg.version)
         print('      installed: ', table_tostring(installed))
         print('      tmp_installed: ', table_tostring(tmp_installed))
         print('      to_install: ', table_tostring(to_install))
-        print('      dependencies: ', table_tostring(pkg.dependencies))
-        print('  -is installed: ', is_installed(pkg.package, tmp_installed, pkg_const))
+        print('      dependencies: ', table_tostring(pkg:dependencies()))
+        print('  -is installed: ', is_installed(pkg.name, tmp_installed, pkg_const))
         -- ]]
 
         -- Clear state from previous iteration
         pkg_installed, err = false, nil
 
         -- Check if it was already added by previous candidate
-        pkg_installed, err = is_installed(pkg.package, tmp_installed, pkg_const)
+        pkg_installed, err = is_installed(pkg.name, tmp_installed, pkg_const)
         if pkg_installed then
             break
         end
@@ -141,18 +134,12 @@ function resolve_dependencies(package, manifest, installed, dependency_parents, 
         -- Maybe check for conflicting packages here if we will support that functionallity
 
         -- Resolve dependencies of the package
-        if pkg.dependencies then
+        if pkg:dependencies(config.platform) then
 
-            local deps = pkg.dependencies
-
-            if deps.platforms then
-                tablex.insertvalues(deps, get_platform_deps(deps.platforms))
-               deps.platforms = nil
-                -- TODO merge dependencies properly
-            end
+            local deps = pkg:dependencies(config.platform)
 
             -- For preventing circular dependencies
-            table.insert(dependency_parents, pkg.package)
+            table.insert(dependency_parents, pkg.name)
 
             -- For each dep of pkg
             for _, dep in ipairs(deps) do
@@ -230,8 +217,7 @@ function get_package_list(package, manifest, version)
 
     -- Add virtual Lua package to the manifest
     local lua_version = _VERSION:match("Lua%s+([%d%.%-]+)")
-    manifest.packages["lua"] = {[lua_version] = {dependencies = {}}}
-    local installed = {newPackage("lua", lua_version, manifest)}
+    local installed = {Package:new("lua", lua_version, {})}
 
     --local pkg = newPackage(package, version, manifest)
     local to_install, err = resolve_dependencies(package .. (version and ("=="..version) or ""), manifest, installed, {})
