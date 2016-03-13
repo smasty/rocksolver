@@ -3,7 +3,7 @@
 -- Author: Martin Srank, martin@smasty.net
 -- License: MIT
 
-module("lunaci.package", package.seeall)
+module("lunaci.Package", package.seeall)
 
 local const = require "lunaci.constraints"
 local tablex = require "pl.tablex"
@@ -11,23 +11,23 @@ local tablex = require "pl.tablex"
 
 Package = {}
 
-function Package:new(package, version, spec, remote)
-    o = {}
+function Package:new(name, version, spec, is_local)
+    local o = {}
     setmetatable(o, self)
     self.__index = self
 
-    self.package = package
-    self.version = type(version) == 'table' and version or const.parseVersion(version)
-    self.spec = spec
-    self.remote = remote
-    self.platforms = spec.supported_platforms and spec.supported_platforms or {}
+    o.name = name
+    o.version = version --type(version) == 'table' and version or const.parseVersion(version)
+    o.spec = spec
+    o.remote = not is_local
+    o.platforms = spec.supported_platforms and spec.supported_platforms or {}
 
     return o
 end
 
 
 function Package:__tostring()
-    return self.package .. ' ' .. self.version
+    return self.name .. ' ' .. self.version
 end
 
 
@@ -51,29 +51,28 @@ function Package:supports_platform(...)
     -- If all platforms are supported, just return true
     if #self.platforms == 0 then return true end
 
-    local available_platforms = arg
-    if #arg == 1 and type(arg[1]) == "table" then
-        available_platforms = arg[1]
+    local available = {...}
+    if #available == 1 and type(available[1]) == "table" then
+        available = available[1]
     end
+    available = tablex.makeset(available)
 
     local support = nil
     for _, p in pairs(self.platforms) do
         local neg, p = p:match("^(!?)(.*)")
         if neg == "!" then
-            if available_platforms[p] then
+            if available[p] then
                 return false, "Platform " .. p .. " is not supported"
             end
-        else
-            if available_platforms[p] then
-                supported = true
-            else if supported == nil then
-                supported = false
-            end
+        elseif available[p] then
+            supported = true
+        elseif supported == nil then
+            supported = false
         end
     end
 
     if supported == false then
-        return false, "Platforms " .. table.concat(available_platforms, ", ") .. " are not supported"
+        return false, "Platforms " .. table.concat(tablex.keys(available), ", ") .. " are not supported"
     end
     return true
 end
@@ -84,7 +83,7 @@ end
 function Package:dependencies(platforms)
     if not platforms then
         return self.spec.dependencies
-    else if type(platforms) ~= 'table' then
+    elseif type(platforms) ~= 'table' then
         platforms = {platforms}
     end
 
@@ -101,10 +100,12 @@ function Package:dependencies(platforms)
 
     local deps = self.spec.dependencies
 
-    if and deps.platforms then
+    if deps.platforms then
         tablex.insertvalues(deps, get_platform_deps(platforms))
         deps.platforms = nil
     end
 
     return deps
 end
+
+return Package
