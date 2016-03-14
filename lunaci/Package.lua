@@ -31,6 +31,18 @@ function Package:__tostring()
 end
 
 
+function Package:__eq(p2)
+    return self.name == p2.name
+        and const.parseVersion(self.version) == const.parseVersion(p2.version)
+end
+
+
+function Package:__lt(p2)
+    assert(self.name == p2.name, "Cannot compare two different packages")
+    return const.parseVersion(self.version) < const.parseVersion(p2.version)
+end
+
+
 -- A local package has the full Rockspec available in Package.spec
 function Package:is_local()
     return not self.remote
@@ -107,5 +119,6 @@ function Package:dependencies(platforms)
 
     return deps
 end
+
 
 return Package
