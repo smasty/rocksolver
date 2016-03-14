@@ -97,6 +97,11 @@ local version_mt = {
             return (v1.revision < v2.revision)
         end
         return false
+    end,
+
+
+    __tostring = function(v)
+        return v.string
     end
 }
 
