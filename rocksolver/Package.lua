@@ -21,7 +21,7 @@ setmetatable(Package, {
 function Package.new(name, version, spec, is_local)
     local self = setmetatable({}, Package)
 
-    -- TODO asserts, version as parsed
+    -- TODO asserts
     self.name = name
     self.version = type(version) == 'table' and version or const.parseVersion(version)
     self.spec = spec
@@ -29,6 +29,12 @@ function Package.new(name, version, spec, is_local)
     self.platforms = spec.supported_platforms and spec.supported_platforms or {}
 
     return self
+end
+
+
+function Package.fromRockspec(rockspec)
+    -- TODO asserts for table and missing fields
+    return Package(rockspec.package, rockspec.version, rockspec, true)
 end
 
 
