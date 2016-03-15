@@ -19,9 +19,12 @@ setmetatable(Package, {
 })
 
 function Package.new(name, version, spec, is_local)
+    assert(type(name) == "string", "Package.new: Argument 'name' is not a string.")
+    assert(type(version) == "string" or type(version) == "table", "Package.new: Argument 'version' is not a string or table.")
+    assert(type(spec) == "table", "Package.new: Argument 'spec' is not a table.")
+
     local self = setmetatable({}, Package)
 
-    -- TODO asserts
     self.name = name
     self.version = type(version) == 'table' and version or const.parseVersion(version)
     self.spec = spec
@@ -33,7 +36,10 @@ end
 
 
 function Package.fromRockspec(rockspec)
-    -- TODO asserts for table and missing fields
+    assert(type(rockspec) == "table", "Package.fromRockspec: Argument 'rockspec' is not a table.")
+    assert(rockspec.package, "Package.fromRockspec: Given rockspec does not contain package name.")
+    assert(rockspec.version, "Package.fromRockspec: Given rockspec does not contain package version.")
+
     return Package(rockspec.package, rockspec.version, rockspec, true)
 end
 
@@ -51,8 +57,12 @@ end
 
 
 -- Package comparison - cannot compare packages with different name.
+-- TODO Could we compare it with an arbitrary version?
 function Package:__lt(p2)
-    assert(self.name == p2.name, "Cannot compare two different packages")
+    assert(getmetatable(self) == Package, "Cannot compare Package with something else.")
+    assert(getmetatable(p2) == Package, "Cannot compare Package with something else.")
+    assert(self.name == p2.name, "Cannot compare two different Packages.")
+
     return self.version < p2.version
 end
 
@@ -106,12 +116,14 @@ end
 
 -- Returns all package dependencies. If platforms are provided and the package uses per-platform overrides,
 -- applicable platform-specific dependencies will be added to the list of dependencies.
+-- TODO caching
 function Package:dependencies(platforms)
     if not platforms then
         return self.spec.dependencies and self.spec.dependencies or {}
-    elseif type(platforms) ~= 'table' then
+    elseif type(platforms) == 'string' then
         platforms = {platforms}
     end
+    assert(type(platforms) == "table", "Package.dependencies: Argument 'platforms' is not a table or string.")
 
     local function get_platform_deps(platforms)
         local deps = {}

@@ -11,7 +11,7 @@ local Package = require "rocksolver.Package"
 -- Given list of Packages and a repo path template string,
 -- generates a table in LuaDist manifest format.
 -- repo_path should contain a %s placeholder for the package name.
--- Local manifest example: ../data/%s
+-- Local manifest example:  packages/%s
 -- Remote manifest example: git://github.com/LuaDist/%s.git
 function generate(packages, repo_path)
     assert(type(packages) == "table", "manifest.generate: Argument 'packages' is not a table.")

@@ -56,7 +56,9 @@ end
 -- Check if a given package is in the provided list of installed packages.
 -- Can also check for package version constraint.
 function DependencySolver:is_installed(pkg_name, installed, pkg_constraint)
-    -- TODO asserts
+    assert(type(pkg_name) == "string", "DependencySolver.is_installed: Argument 'pkg_name' is not a string.")
+    assert(type(installed) == "table", "DependencySolver.is_installed: Argument 'installed' is not a table.")
+    assert(not pkg_constraint or type(pkg_constraint) == "string", "DependencySolver.is_installed: Argument 'pkg_constraint' is not a string.")
 
     local function selected(pkg)
         return pkg.selected and "selected" or "installed"
@@ -66,6 +68,7 @@ function DependencySolver:is_installed(pkg_name, installed, pkg_constraint)
     local pkg_installed, err = false, nil
 
     for _, installed_pkg in ipairs(installed) do
+        assert(getmetatable(installed_pkg) == Package, "DependencySolver.is_installed: Argument 'installed' does not contain Package instances.")
         if pkg_name == installed_pkg.name then
             if not pkg_constraint or const.constraint_satisified(installed_pkg.version, pkg_constraint) then
                 pkg_installed = true
@@ -83,7 +86,7 @@ end
 
 
 function DependencySolver:find_candidates(package)
-    -- TODO asserts
+    assert(type(package) == "string", "DependencySolver.find_candidates: Argument 'package' is not a string.")
 
     pkg_name, pkg_constraint = const.split(package)
     pkg_constraint = pkg_constraint or ""
@@ -109,7 +112,11 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     dependency_parents = dependency_parents or {}
     tmp_installed = tmp_installed or tablex.deepcopy(installed)
 
-    -- TODO asserts
+    assert(type(package) == "string", "DependencySolver.resolve_dependencies: Argument 'package' is not a string.")
+    assert(type(installed) == "table", "DependencySolver.resolve_dependencies: Argument 'installed' is not a table.")
+    assert(type(dependency_parents) == "table", "DependencySolver.resolve_dependencies: Argument 'dependency_parents' is not a table.")
+    assert(type(tmp_installed) == "table", "DependencySolver.resolve_dependencies: Argument 'tmp_installed' is not a table.")
+
 
     -- Extract package name and constraint
     local pkg_name, pkg_const = const.split(package)
