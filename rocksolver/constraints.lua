@@ -1,4 +1,4 @@
--- LunaCI dependency constraint handling
+-- LuaDist Package dependency constraint handling
 -- Part of the LuaDist project - http://luadist.org
 -- Peter Drahoš, LuaDist Project, 2010
 -- Original Code borrowed from LuaRocks Project
@@ -18,7 +18,7 @@
 -- test/test_deps.lua file included with LuaDist provides some
 -- insights on what these criteria are.
 
-module("lunaci.constraints", package.seeall)
+module("rocksolver.constraints", package.seeall)
 
 
 local precedence = {
@@ -100,6 +100,7 @@ local version_mt = {
     end,
 
 
+    -- String representation of version
     __tostring = function(v)
         return v.string
     end
@@ -126,6 +127,9 @@ setmetatable(version_cache, {
 -- if the input string contains invalid characters.
 function parseVersion(vstring)
     if not vstring then return nil end
+    if type(vstring) == "table" and getmetatable(vstring) == version_mt then
+        return vstring
+    end
     assert(type(vstring) == "string")
 
     -- function that actually parses the version string

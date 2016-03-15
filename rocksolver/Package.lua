@@ -1,45 +1,53 @@
--- LunaCI package definition
+-- LuaDist Package object definition
 -- Part of the LuaDist project - http://luadist.org
--- Author: Martin Srank, martin@smasty.net
+-- Author: Martin Srank, hello@smasty.net
 -- License: MIT
 
-module("lunaci.Package", package.seeall)
+module("rocksolver.Package", package.seeall)
 
-local const = require "lunaci.constraints"
+local const = require "rocksolver.constraints"
 local tablex = require "pl.tablex"
 
 
-Package = {}
+local Package = {}
+Package.__index = Package
 
-function Package:new(name, version, spec, is_local)
-    local o = {}
-    setmetatable(o, self)
-    self.__index = self
+setmetatable(Package, {
+    __call = function (class, ...)
+        return class.new(...)
+    end,
+})
 
-    o.name = name
-    o.version = version --type(version) == 'table' and version or const.parseVersion(version)
-    o.spec = spec
-    o.remote = not is_local
-    o.platforms = spec.supported_platforms and spec.supported_platforms or {}
+function Package.new(name, version, spec, is_local)
+    local self = setmetatable({}, Package)
 
-    return o
+    -- TODO asserts, version as parsed
+    self.name = name
+    self.version = type(version) == 'table' and version or const.parseVersion(version)
+    self.spec = spec
+    self.remote = not is_local
+    self.platforms = spec.supported_platforms and spec.supported_platforms or {}
+
+    return self
 end
 
 
+-- String representation of the package (name and version)
 function Package:__tostring()
-    return self.name .. ' ' .. self.version
+    return self.name .. ' ' .. tostring(self.version)
 end
 
 
+-- Package equality check - packages are equal if names and versions are equal.
 function Package:__eq(p2)
-    return self.name == p2.name
-        and const.parseVersion(self.version) == const.parseVersion(p2.version)
+    return self.name == p2.name and self.version == p2.version
 end
 
 
+-- Package comparison - cannot compare packages with different name.
 function Package:__lt(p2)
     assert(self.name == p2.name, "Cannot compare two different packages")
-    return const.parseVersion(self.version) < const.parseVersion(p2.version)
+    return self.version < p2.version
 end
 
 
@@ -94,7 +102,7 @@ end
 -- applicable platform-specific dependencies will be added to the list of dependencies.
 function Package:dependencies(platforms)
     if not platforms then
-        return self.spec.dependencies
+        return self.spec.dependencies and self.spec.dependencies or {}
     elseif type(platforms) ~= 'table' then
         platforms = {platforms}
     end
@@ -112,12 +120,12 @@ function Package:dependencies(platforms)
 
     local deps = self.spec.dependencies
 
-    if deps.platforms then
+    if deps and deps.platforms then
         tablex.insertvalues(deps, get_platform_deps(platforms))
         deps.platforms = nil
     end
 
-    return deps
+    return deps and deps or {}
 end
 
 
