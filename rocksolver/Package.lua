@@ -79,6 +79,20 @@ function Package:is_remote()
 end
 
 
+function Package:matches(constraint)
+    local name, ver = const.split(constraint)
+    if name and name ~= '' and name ~= self.name then
+        return false
+    end
+
+    if ver then
+        return const.constraint_satisified(self.version, ver)
+    end
+
+    return true
+end
+
+
 -- Compare package supported platforms with given available platform.
 -- If only negative platforms are listed, we assume all other platforms are supported.
 -- If a positive entry exists, then at least one entry must positively match to the available platform.
