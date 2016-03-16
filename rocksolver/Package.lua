@@ -79,6 +79,9 @@ function Package:is_remote()
 end
 
 
+-- Check if the package matches given constraint.
+-- Constraint can check for package name, version or both.
+-- Example constraints: "package >= 2.0", "< 1.5", "package", "package > 1.0, < 3.0"
 function Package:matches(constraint)
     local name, ver = const.split(constraint)
     if name and name ~= '' and name ~= self.name then

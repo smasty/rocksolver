@@ -67,10 +67,10 @@ function DependencySolver:is_installed(pkg_name, installed, pkg_constraint)
 
     local pkg_installed, err = false, nil
 
-    for _, installed_pkg in ipairs(installed) do
+    for _, installed_pkg in pairs(installed) do
         assert(getmetatable(installed_pkg) == Package, "DependencySolver.is_installed: Argument 'installed' does not contain Package instances.")
         if pkg_name == installed_pkg.name then
-            if not pkg_constraint or const.constraint_satisified(installed_pkg.version, pkg_constraint) then
+            if not pkg_constraint or installed_pkg:matches(pkg_constraint) then
                 pkg_installed = true
                 break
             else
@@ -94,11 +94,9 @@ function DependencySolver:find_candidates(package)
 
     local found = {}
     for version, spec in tablex.sort(self.manifest.packages[pkg_name], const.compareVersions) do
-        if const.constraint_satisified(version, pkg_constraint) then
-            local pkg = Package(pkg_name, version, spec)
-            if pkg:supports_platform(self.platform) then
-                table.insert(found, pkg)
-            end
+        local pkg = Package(pkg_name, version, spec)
+        if pkg:matches(pkg_constraint) and pkg:supports_platform(self.platform) then
+            table.insert(found, pkg)
         end
     end
 
@@ -130,7 +128,6 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
 
     -- Check if the package is already installed
     local pkg_installed, err = self:is_installed(pkg_name, tmp_installed, pkg_const)
-
 
     if pkg_installed then return {} end
     if err then return nil, err end
@@ -167,9 +164,8 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
         -- Maybe check for conflicting packages here if we will support that functionallity
 
         -- Resolve dependencies of the package
-        if pkg:dependencies(self.platform) then
-
-            local deps = pkg:dependencies(self.platform)
+        local deps = pkg:dependencies(self.platform)
+        if deps then
 
             -- For preventing circular dependencies
             table.insert(dependency_parents, pkg.name)
