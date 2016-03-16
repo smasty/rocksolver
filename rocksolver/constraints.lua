@@ -263,7 +263,9 @@ local function partialMatch(version, requested)
     if not version or not requested then return false end
 
     for i = 1, #requested do
-        if requested[i] ~= version[i] then return false end
+        for j = 1, #requested[i] do
+            if requested[i][j] ~= version[i][j] then return false end
+        end
     end
     if requested.revision then
         return requested.revision == version.revision
@@ -284,7 +286,7 @@ function matchConstraints(version, constraints)
     setmetatable(version, version_mt)
     for _, constr in pairs(constraints) do
         local constr_version = constr.version
-            setmetatable(constr.version, version_mt)
+        setmetatable(constr.version, version_mt)
         if     constr.op == "==" then ok = version == constr_version
         elseif constr.op == "~=" then ok = version ~= constr_version
         elseif constr.op == ">"  then ok = version >  constr_version
