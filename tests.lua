@@ -3,7 +3,6 @@
 
 local DependencySolver = require "rocksolver.DependencySolver"
 local Package = require "rocksolver.Package"
-local mfutils = require "rocksolver.manifest"
 
 -- Convert package list to string
 local function describe_packages(pkgs)
