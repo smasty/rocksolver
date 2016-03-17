@@ -6,7 +6,7 @@
 module("rocksolver.Package", package.seeall)
 
 local const = require "rocksolver.constraints"
-local tablex = require "pl.tablex"
+local utils = require "rocksolver.utils"
 
 
 local Package = {}
@@ -108,7 +108,7 @@ function Package:supports_platform(...)
     if #available == 1 and type(available[1]) == "table" then
         available = available[1]
     end
-    available = tablex.makeset(available)
+    local available = utils.makeset(available)
 
     local support = nil
     for _, p in pairs(self.platforms) do
@@ -125,7 +125,7 @@ function Package:supports_platform(...)
     end
 
     if supported == false then
-        return false, "Platforms " .. table.concat(tablex.keys(available), ", ") .. " are not supported"
+        return false, "Platforms " .. table.concat(utils.keys(available), ", ") .. " are not supported"
     end
     return true
 end

@@ -3,12 +3,9 @@
 -- Author: Martin Srank, hello@smasty.net
 -- License: MIT
 
-module("rocksolver.DependencySolver", package.seeall)
-
 local const = require("rocksolver.constraints")
+local utils = require("rocksolver.utils")
 local Package = require("rocksolver.Package")
-
-local tablex = require "pl.tablex"
 
 
 -- helper function for debug purposes
@@ -93,7 +90,7 @@ function DependencySolver:find_candidates(package)
     if not self.manifest.packages[pkg_name] then return {} end
 
     local found = {}
-    for version, spec in tablex.sort(self.manifest.packages[pkg_name], const.compareVersions) do
+    for version, spec in utils.sort(self.manifest.packages[pkg_name], const.compareVersions) do
         local pkg = Package(pkg_name, version, spec)
         if pkg:matches(pkg_constraint) and pkg:supports_platform(self.platform) then
             table.insert(found, pkg)
@@ -108,7 +105,7 @@ end
 function DependencySolver:resolve_dependencies(package, installed, dependency_parents, tmp_installed)
     installed = installed or {}
     dependency_parents = dependency_parents or {}
-    tmp_installed = tmp_installed or tablex.deepcopy(installed)
+    tmp_installed = tmp_installed or utils.deepcopy(installed)
 
     assert(type(package) == "string", "DependencySolver.resolve_dependencies: Argument 'package' is not a string.")
     assert(type(installed) == "table", "DependencySolver.resolve_dependencies: Argument 'installed' is not a table.")
@@ -219,7 +216,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
         else
             -- If some error occured, reset to original state
             to_install = {}
-            tmp_installed = tablex.deepcopy(installed)
+            tmp_installed = utils.deepcopy(installed)
         end
     end
 
