@@ -147,7 +147,9 @@ function Package:dependencies(platforms)
         local plat_deps = self.spec.dependencies.platforms
         for _, p in pairs(platforms) do
             if plat_deps[p] then
-                tablex.insertvalues(deps, plat_deps[p])
+                for _, v in pairs(plat_deps[p]) do
+                    table.insert(deps, v)
+                end
             end
         end
         return deps
@@ -156,7 +158,9 @@ function Package:dependencies(platforms)
     local deps = self.spec.dependencies
 
     if deps and deps.platforms then
-        tablex.insertvalues(deps, get_platform_deps(platforms))
+        for _, v in pairs(get_platform_deps(platforms)) do
+            table.insert(deps, v)
+        end
         deps.platforms = nil
     end
 
