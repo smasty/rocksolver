@@ -322,11 +322,11 @@ end
 function split(name)
     assert(type(name) == "string")
 
-    local cut = string.find(name, "[%s-=<>~]+%d") or string.find(name, "[%s-=<>~]+scm")
+    local cut = string.find(name, "[%s=<>~]+")
 
     -- Cut the string and remove - from version if needed.
     if cut then
-        return string.sub(name, 0, cut-1), string.gsub(string.sub(name, cut), "^[-%s]", "")
+        return string.sub(name, 0, cut-1), string.gsub(string.sub(name, cut), "^[-%s]*", "")
     end
     return name, nil
 end

@@ -57,7 +57,6 @@ end
 
 
 -- Package comparison - cannot compare packages with different name.
--- TODO Could we compare it with an arbitrary version?
 function Package:__lt(p2)
     assert(getmetatable(self) == Package, "Cannot compare Package with something else.")
     assert(getmetatable(p2) == Package, "Cannot compare Package with something else.")

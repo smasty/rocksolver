@@ -5,9 +5,6 @@
 
 module("rocksolver.utils", package.seeall)
 
---require "pl"
---pretty.dump(Pkg)
-
 
 -- Given list of Packages and a repo path template string,
 -- generates a table in LuaDist manifest format.

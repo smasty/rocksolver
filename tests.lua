@@ -345,6 +345,28 @@ tests.version_of_depends_5 = function()
     assert(describe_packages(pkgs) == "a-1.0 b-1.0 c-1.0", pkgs_fail_msg(pkgs, err))
 end
 
+tests.version_of_depends_8 = function()
+    local manifest, installed = {}, {}
+    manifest.a1 = {name = "a", version = "1.0"}
+    manifest.b = {name = "b", version = "1.0", deps = {"a 1.0"}}
+
+    manifest.c = {name = "c", version = "1.0", deps = {"b 1.0"}}
+
+    local pkgs, err = get_dependencies('c', manifest, installed)
+    assert(describe_packages(pkgs) == "a-1.0 b-1.0 c-1.0", pkgs_fail_msg(pkgs, err))
+end
+
+tests.version_of_depends_9 = function()
+    local manifest, installed = {}, {}
+    manifest.a1 = {name = "a", version = "v1.0"}
+    manifest.b = {name = "b", version = "v1.0", deps = {"a = v1.0"}}
+
+    manifest.c = {name = "c", version = "v1.0", deps = {"b = v1.0"}}
+
+    local pkgs, err = get_dependencies('c', manifest, installed)
+    assert(describe_packages(pkgs) == "a-v1.0 b-v1.0 c-v1.0", pkgs_fail_msg(pkgs, err))
+end
+
 -- TODO: Without trying all possible permutations of packages to install
 -- LuaDist probably can't find a solution to this.
 --[[

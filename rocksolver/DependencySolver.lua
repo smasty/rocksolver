@@ -67,7 +67,7 @@ function DependencySolver:is_installed(pkg_name, installed, pkg_constraint)
     for _, installed_pkg in pairs(installed) do
         assert(getmetatable(installed_pkg) == Package, "DependencySolver.is_installed: Argument 'installed' does not contain Package instances.")
         if pkg_name == installed_pkg.name then
-            if not pkg_constraint or installed_pkg:matches(pkg_constraint) then
+            if not pkg_constraint or installed_pkg:matches(pkg_name .. " " .. pkg_constraint) then
                 pkg_installed = true
                 break
             else
@@ -92,7 +92,7 @@ function DependencySolver:find_candidates(package)
     local found = {}
     for version, spec in utils.sort(self.manifest.packages[pkg_name], const.compareVersions) do
         local pkg = Package(pkg_name, version, spec)
-        if pkg:matches(pkg_constraint) and pkg:supports_platform(self.platform) then
+        if pkg:matches(package) and pkg:supports_platform(self.platform) then
             table.insert(found, pkg)
         end
     end
@@ -113,7 +113,8 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     assert(type(tmp_installed) == "table", "DependencySolver.resolve_dependencies: Argument 'tmp_installed' is not a table.")
 
 
-    -- Extract package name and constraint
+    -- Sanitize and extract package name and constraint
+    package = package:gsub("%s+", " "):lower()
     local pkg_name, pkg_const = const.split(package)
 
     --[[ for future debugging:
