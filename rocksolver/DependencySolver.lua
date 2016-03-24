@@ -8,29 +8,6 @@ local utils = require("rocksolver.utils")
 local Package = require("rocksolver.Package")
 
 
--- helper function for debug purposes
-local function table_tostring(tbl, label)
-    assert(type(tbl) == "table", "utils.table_tostring: Argument 'tbl' is not a table.")
-    local str = ""
-    for k,v in pairs(tbl) do
-        if type(v) == "table" then
-            if v.__tostring then
-                str = str .. tostring(v) .. " "
-            else
-                str = str .. "(" ..table_tostring(v, k) .. ")"
-            end
-        else
-            if label ~= nil then
-                str = str .. " " .. k .. " = " .. tostring(v) .. ", "
-            else
-                str = str .. tostring(v) .. ", "
-            end
-        end
-    end
-    return str
-end
-
-
 local DependencySolver = {}
 DependencySolver.__index = DependencySolver
 
@@ -119,8 +96,8 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
 
     --[[ for future debugging:
     print('resolving: '.. package)
-    print('    installed: ', table_tostring(installed))
-    print('    tmp_installed: ', table_tostring(tmp_installed))
+    print('    installed: ', utils.table_tostring(installed))
+    print('    tmp_installed: ', utils.table_tostring(tmp_installed))
     print('- is installed: ', self:is_installed(pkg_name, tmp_installed, pkg_const))
     --]]
 
@@ -143,10 +120,10 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
 
         --[[ for future debugging:
         print('  candidate: '.. tostring(pkg))
-        print('      installed: ', table_tostring(installed))
-        print('      tmp_installed: ', table_tostring(tmp_installed))
-        print('      to_install: ', table_tostring(to_install))
-        print('      dependencies: ', table_tostring(pkg:dependencies()))
+        print('      installed: ', utils.table_tostring(installed))
+        print('      tmp_installed: ', utils.table_tostring(tmp_installed))
+        print('      to_install: ', utils.table_tostring(to_install))
+        print('      dependencies: ', utils.table_tostring(pkg:dependencies(self.platform)))
         print('  -is installed: ', self:is_installed(pkg.name, tmp_installed, pkg_const))
         -- ]]
 

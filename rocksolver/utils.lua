@@ -109,3 +109,26 @@ function sort(tbl, fn)
         return keys[i], tbl[keys[i]]
     end
 end
+
+
+-- helper function for debug purposes
+local function table_tostring(tbl, label)
+    assert(type(tbl) == "table", "utils.table_tostring: Argument 'tbl' is not a table.")
+    local str = ""
+    for k,v in pairs(tbl) do
+        if type(v) == "table" then
+            if v.__tostring then
+                str = str .. tostring(v) .. " "
+            else
+                str = str .. "(" ..table_tostring(v, k) .. ")"
+            end
+        else
+            if label ~= nil then
+                str = str .. " " .. k .. " = " .. tostring(v) .. ", "
+            else
+                str = str .. tostring(v) .. ", "
+            end
+        end
+    end
+    return str
+end

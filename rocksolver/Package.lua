@@ -35,7 +35,7 @@ function Package.new(name, version, spec, is_local)
 end
 
 
-function Package.fromRockspec(rockspec)
+function Package.from_rockspec(rockspec)
     assert(type(rockspec) == "table", "Package.fromRockspec: Argument 'rockspec' is not a table.")
     assert(rockspec.package, "Package.fromRockspec: Given rockspec does not contain package name.")
     assert(rockspec.version, "Package.fromRockspec: Given rockspec does not contain package version.")
