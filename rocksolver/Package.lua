@@ -11,14 +11,8 @@ local utils = require "rocksolver.utils"
 
 local Package = {}
 Package.__index = Package
-
 setmetatable(Package, {
-    __call = function (class, ...)
-        return class.new(...)
-    end,
-})
-
-function Package.new(name, version, spec, is_local)
+__call = function(_, name, version, spec, is_local)
     assert(type(name) == "string", "Package.new: Argument 'name' is not a string.")
     assert(type(version) == "string" or type(version) == "table", "Package.new: Argument 'version' is not a string or table.")
     assert(type(spec) == "table", "Package.new: Argument 'spec' is not a table.")
@@ -33,6 +27,7 @@ function Package.new(name, version, spec, is_local)
 
     return self
 end
+})
 
 
 function Package.from_rockspec(rockspec)

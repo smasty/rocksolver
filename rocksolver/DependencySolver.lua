@@ -10,14 +10,8 @@ local Package = require("rocksolver.Package")
 
 local DependencySolver = {}
 DependencySolver.__index = DependencySolver
-
 setmetatable(DependencySolver, {
-    __call = function (class, ...)
-        return class.new(...)
-    end,
-})
-
-function DependencySolver.new(manifest, platform)
+__call = function(_, manifest, platform)
     local self = setmetatable({}, DependencySolver)
 
     self.manifest = manifest
@@ -25,6 +19,7 @@ function DependencySolver.new(manifest, platform)
 
     return self
 end
+})
 
 
 -- Check if a given package is in the provided list of installed packages.
