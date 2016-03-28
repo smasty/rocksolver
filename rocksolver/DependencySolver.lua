@@ -84,6 +84,9 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     dependency_parents = dependency_parents or {}
     tmp_installed = tmp_installed or utils.deepcopy(installed)
 
+    if getmetatable(package == Package) then
+        package = tostring(package)
+    end
     assert(type(package) == "string", "DependencySolver.resolve_dependencies: Argument 'package' is not a string.")
     assert(type(installed) == "table", "DependencySolver.resolve_dependencies: Argument 'installed' is not a table.")
     assert(type(dependency_parents) == "table", "DependencySolver.resolve_dependencies: Argument 'dependency_parents' is not a table.")
