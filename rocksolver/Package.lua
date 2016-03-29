@@ -45,6 +45,12 @@ function Package:__tostring()
 end
 
 
+-- Enable string concatenation
+function Package:__concat(p2)
+    return tostring(self) .. tostring(p2)
+end
+
+
 -- Package equality check - packages are equal if names and versions are equal.
 function Package:__eq(p2)
     return self.name == p2.name and self.version == p2.version

@@ -79,7 +79,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     dependency_parents = dependency_parents or {}
     tmp_installed = tmp_installed or utils.deepcopy(installed)
 
-    if getmetatable(package == Package) then
+    if getmetatable(package) == Package then
         package = tostring(package)
     end
     assert(type(package) == "string", "DependencySolver.resolve_dependencies: Argument 'package' is not a string.")
@@ -117,7 +117,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     for _, pkg in ipairs(candidates) do
 
         --[[ for future debugging:
-        print('  candidate: '.. tostring(pkg))
+        print('  candidate: '.. pkg)
         print('      installed: ', utils.table_tostring(installed))
         print('      tmp_installed: ', utils.table_tostring(tmp_installed))
         print('      to_install: ', utils.table_tostring(to_install))
@@ -157,7 +157,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
 
                 -- If circular deps detected
                 if has_circular_dependency then
-                    err = "Error getting dependency of \"" .. tostring(pkg) .. "\": \"" .. dep .. "\" is a circular dependency."
+                    err = "Error getting dependency of \"" .. pkg .. "\": \"" .. dep .. "\" is a circular dependency."
                     break
                 end
 
@@ -165,7 +165,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
                 local deps_to_install, deps_err = self:resolve_dependencies(dep, installed, dependency_parents, tmp_installed)
 
                 if deps_err then
-                    err = "Error getting dependency of \"" .. tostring(pkg) .. "\": " .. deps_err
+                    err = "Error getting dependency of \"" .. pkg .. "\": " .. deps_err
                     break
                 end
 
@@ -188,7 +188,7 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
             pkg.selected = true
             table.insert(tmp_installed, pkg)
             table.insert(to_install, pkg)
-            --print("+ Installing package " .. tostring(pkg))
+            --print("+ Installing package " .. pkg)
         else
             -- If some error occured, reset to original state
             to_install = {}
