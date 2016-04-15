@@ -19,7 +19,7 @@ __call = function(_, name, version, spec, is_local)
 
     local self = setmetatable({}, Package)
 
-    self.name = name
+    self.name = name:lower()
     self.version = type(version) == 'table' and version or const.parseVersion(version)
     self.spec = spec
     self.remote = not is_local
@@ -30,12 +30,13 @@ end
 })
 
 
+-- Create a Package instance from rockspec table.
 function Package.from_rockspec(rockspec)
     assert(type(rockspec) == "table", "Package.fromRockspec: Argument 'rockspec' is not a table.")
     assert(rockspec.package, "Package.fromRockspec: Given rockspec does not contain package name.")
     assert(rockspec.version, "Package.fromRockspec: Given rockspec does not contain package version.")
 
-    return Package(rockspec.package, rockspec.version, rockspec, true)
+    return Package(rockspec.package:lower(), rockspec.version, rockspec, true)
 end
 
 
@@ -164,7 +165,7 @@ function Package:dependencies(platforms)
         deps.platforms = nil
     end
 
-    return deps and deps or {}
+    return deps or {}
 end
 
 
