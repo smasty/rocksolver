@@ -23,7 +23,7 @@ __call = function(_, name, version, spec, is_local)
     self.version = type(version) == 'table' and version or const.parseVersion(version)
     self.spec = spec
     self.remote = not is_local
-    self.platforms = spec.supported_platforms and spec.supported_platforms or {}
+    self.platforms = spec.supported_platforms or {}
 
     return self
 end
@@ -111,7 +111,7 @@ function Package:supports_platform(...)
     end
     local available = utils.makeset(available)
 
-    local support = nil
+    local supported = nil
     for _, p in pairs(self.platforms) do
         local neg, p = p:match("^(!?)(.*)")
         if neg == "!" then
