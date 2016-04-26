@@ -44,7 +44,7 @@ function DependencySolver:is_installed(pkg_name, installed, pkg_constraint)
                 break
             else
                 err = ("Package %s%s needed, but %s at version %s.")
-                    :format(tostring(pkg_name), tostring(constraint_str), selected(installed_pkg), installed_pkg.version)
+                    :format(tostring(pkg_name), constraint_str, selected(installed_pkg), installed_pkg.version)
                 break
             end
         end
