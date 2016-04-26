@@ -367,6 +367,15 @@ tests.version_of_depends_9 = function()
     assert(describe_packages(pkgs) == "a-v1.0 b-v1.0 c-v1.0", pkgs_fail_msg(pkgs, err))
 end
 
+tests.version_of_depends_10 = function()
+    local manifest, installed = {}, {}
+    manifest.a1 = {name = "a", version = "5.1"}
+    manifest.a2 = {name = "a", version = "5.2.4"}
+
+    local pkgs, err = get_dependencies('a 5.2', manifest, installed)
+    assert(describe_packages(pkgs) == "a-5.2.4", pkgs_fail_msg(pkgs, err))
+end
+
 -- TODO: Without trying all possible permutations of packages to install
 -- LuaDist probably can't find a solution to this.
 --[[
