@@ -92,13 +92,6 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
     package = package:gsub("%s+", " "):lower()
     local pkg_name, pkg_const = const.split(package)
 
-    --[[ for future debugging:
-    print('resolving: '.. package)
-    print('    installed: ', utils.table_tostring(installed))
-    print('    tmp_installed: ', utils.table_tostring(tmp_installed))
-    print('- is installed: ', self:is_installed(pkg_name, tmp_installed, pkg_const))
-    --]]
-
     -- Check if the package is already installed
     local pkg_installed, err = self:is_installed(pkg_name, tmp_installed, pkg_const)
 
@@ -115,15 +108,6 @@ function DependencySolver:resolve_dependencies(package, installed, dependency_pa
 
     -- For each candidate (highest version first)
     for _, pkg in ipairs(candidates) do
-
-        --[[ for future debugging:
-        print('  candidate: '.. pkg)
-        print('      installed: ', utils.table_tostring(installed))
-        print('      tmp_installed: ', utils.table_tostring(tmp_installed))
-        print('      to_install: ', utils.table_tostring(to_install))
-        print('      dependencies: ', utils.table_tostring(pkg:dependencies(self.platform)))
-        print('  -is installed: ', self:is_installed(pkg.name, tmp_installed, pkg_const))
-        -- ]]
 
         -- Clear state from previous iteration
         pkg_installed, err = false, nil

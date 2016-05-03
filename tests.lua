@@ -373,7 +373,26 @@ tests.version_of_depends_10 = function()
     manifest.a2 = {name = "a", version = "5.2.4"}
 
     local pkgs, err = get_dependencies('a 5.2', manifest, installed)
+    assert(describe_packages(pkgs) == nil and err:find("No suitable candidate"), pkgs_fail_msg(pkgs, err))
+end
+
+tests.version_of_depends_11 = function()
+    local manifest, installed = {}, {}
+    manifest.a1 = {name = "a", version = "5.1"}
+    manifest.a2 = {name = "a", version = "5.2.4"}
+
+    local pkgs, err = get_dependencies('a ~> 5.2', manifest, installed)
     assert(describe_packages(pkgs) == "a-5.2.4", pkgs_fail_msg(pkgs, err))
+end
+
+tests.version_of_depends_12 = function()
+    local manifest, installed = {}, {}
+    manifest.a1 = {name = "a", version = "5.1.alpha-2"}
+    manifest.a2 = {name = "a", version = "5.1.beta-2"}
+    manifest.a2 = {name = "a", version = "5.1-1"}
+
+    local pkgs, err = get_dependencies('a >= 5.1', manifest, installed)
+    assert(describe_packages(pkgs) == "a-5.1-1", pkgs_fail_msg(pkgs, err))
 end
 
 -- TODO: Without trying all possible permutations of packages to install
